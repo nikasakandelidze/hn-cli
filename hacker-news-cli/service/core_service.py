@@ -1,9 +1,12 @@
 from controller.cli_controller import CliController
+from hacker_news_api_adapter import HackerNewsApiAdapter
 from utils.constants import WELCOME_MESSAGE, POTENTIAL_COMMANDS, VALIDATION_ERROR_MESSAGE, SEPARATOR, INPUT_PROMPT
+from domain import NewsDto, JobDto
 
 class CoreService:
-    def __init__(self, controller: CliController) -> None:
+    def __init__(self, controller: CliController, hn_adapter: HackerNewsApiAdapter) -> None:
         self.controller = controller
+        self.hn_adapter = hn_adapter
     
     def start(self):
         self.controller.present(WELCOME_MESSAGE)
@@ -18,6 +21,14 @@ class CoreService:
         if not self._validate_input(identifier):
             message = VALIDATION_ERROR_MESSAGE.format(potential_values=','.join(POTENTIAL_COMMANDS['commands'].keys()))
             self.controller.present(message)
+            return
+        if identifier == '0':
+            news_list: list[NewsDto] = self.hn_adapter.fetch_news_list()
+        elif identifier == '1':
+            single_new :list[NewsDto] = self.hn_adapter.fetch_news_by_id('DUMMY_ID')
+        elif identifier == '2':
+            jobs_list : list[JobDto] = self.hn_adapter.fetch_jobs_list()
+
 
     def _validate_input(self, identifier: str) -> bool:
         return identifier in POTENTIAL_COMMANDS['commands']
